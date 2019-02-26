@@ -1,5 +1,5 @@
 package com.example.demo.models;
 
-public enum EquipmenetCondition {
+public enum EquipmentCondition {
     SERVICEABLE
 }
