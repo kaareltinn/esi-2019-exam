@@ -1,12 +1,13 @@
 package com.example.demo.sales;
 
 import com.example.demo.DemoApplication;
-import com.example.demo.models.EquipmentCondition;
-import com.example.demo.models.PlantInventoryEntry;
-import com.example.demo.models.PlantInventoryItem;
-import com.example.demo.repositories.PlantInventoryEntryRepository;
-import com.example.demo.repositories.PlantInventoryItemRepository;
-import com.example.demo.repositories.PurchaseOrderRepository;
+import com.example.demo.inventory.domain.model.EquipmentCondition;
+import com.example.demo.inventory.domain.model.PlantInventoryEntry;
+import com.example.demo.inventory.domain.model.PlantInventoryItem;
+import com.example.demo.inventory.domain.repository.PlantInventoryEntryRepository;
+import com.example.demo.inventory.domain.repository.PlantInventoryItemRepository;
+import com.example.demo.inventory.domain.repository.PlantReservationRepository;
+import com.example.demo.sales.domain.PurchaseOrderRepository;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlDateInput;
@@ -49,6 +50,9 @@ public class CreationOfPurchaseOrderSteps {
     @Autowired
     PurchaseOrderRepository purchaseOrderRepository;
 
+    @Autowired
+    PlantReservationRepository plantReservationRepository;
+
     @Before  // Use `Before` from Cucumber library
     public void setUp() {
         customerBrowser = MockMvcWebClientBuilder.webAppContextSetup(wac).build();
@@ -57,6 +61,7 @@ public class CreationOfPurchaseOrderSteps {
     @After  // Use `After` from Cucumber library
     public void tearOff() {
         purchaseOrderRepository.deleteAll();
+        plantReservationRepository.deleteAll();
         plantInventoryItemRepository.deleteAll();
         plantInventoryEntryRepository.deleteAll();
     }

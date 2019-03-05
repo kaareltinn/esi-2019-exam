@@ -1,10 +1,14 @@
 package com.example.demo.repositories;
 
 import com.example.demo.DemoApplication;
-import com.example.demo.models.BusinessPeriod;
-import com.example.demo.models.PlantInventoryEntry;
-import com.example.demo.models.PlantInventoryItem;
-import com.example.demo.models.PlantReservation;
+import com.example.demo.common.domain.BusinessPeriod;
+import com.example.demo.inventory.domain.model.PlantInventoryEntry;
+import com.example.demo.inventory.domain.model.PlantInventoryItem;
+import com.example.demo.inventory.domain.model.PlantReservation;
+import com.example.demo.inventory.domain.repository.InventoryRepository;
+import com.example.demo.inventory.domain.repository.PlantInventoryEntryRepository;
+import com.example.demo.inventory.domain.repository.PlantInventoryItemRepository;
+import com.example.demo.inventory.domain.repository.PlantReservationRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +18,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.LocalDate;
-import java.time.Period;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
