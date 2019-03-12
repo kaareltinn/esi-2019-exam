@@ -32,7 +32,7 @@ insert into plant_inventory_item (id, plant_info_id, serial_number, equipment_co
 insert into plant_inventory_item (id, plant_info_id, serial_number, equipment_condition)
     values (2, 2, 'A02', 'SERVICEABLE');
 insert into plant_inventory_item (id, plant_info_id, serial_number, equipment_condition)
-    values (3, 3, 'A03', 'UNSERVICEABLEREPAIRABLE');
+    values (3, 3, 'A03', 'SERVICEABLE');
 
 
 insert into plant_reservation (id, plant_id, start_date, end_date)

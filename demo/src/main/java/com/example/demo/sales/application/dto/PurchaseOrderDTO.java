@@ -7,6 +7,7 @@ import com.example.demo.inventory.domain.model.PlantInventoryEntry;
 import com.example.demo.inventory.domain.model.PlantReservation;
 import com.example.demo.sales.domain.POStatus;
 import lombok.Data;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -14,8 +15,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-public class PurchaseOrderDTO {
+public class PurchaseOrderDTO extends ResourceSupport {
     Long _id;
     BusinessPeriodDTO rentalPeriod;
     PlantInventoryEntryDTO plant;
+    POStatus status;
 }

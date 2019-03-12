@@ -34,8 +34,15 @@ public class SalesService {
     @Autowired
     PlantReservationRepository plantReservationRepository;
 
+    @Autowired
+    PurchaseOrderAssembler purchaseOrderAssembler;
 
-    public void createPO(PurchaseOrderDTO poDTO) throws Exception {
+    public PurchaseOrderDTO findPO(Long id) {
+        PurchaseOrder po = poRepository.findById(id).orElse(null);
+        return purchaseOrderAssembler.toResource(po);
+    }
+
+    public PurchaseOrderDTO createPO(PurchaseOrderDTO poDTO) throws Exception {
 
         BusinessPeriod period = BusinessPeriod.of(
                          poDTO.getRentalPeriod().getStartDate(),
@@ -51,7 +58,7 @@ public class SalesService {
         if(poDTO.getPlant() == null)
             throw new Exception("Invalid Input Plant");
 
-        PlantInventoryEntry plant = plantInventoryEntryRepository.findById(poDTO.getPlant().getId()).orElse(null);
+        PlantInventoryEntry plant = plantInventoryEntryRepository.findById(poDTO.getPlant().get_id()).orElse(null);
 
         if(plant == null)
             throw new Exception("Plant NOT Found");
@@ -77,5 +84,9 @@ public class SalesService {
         po.getReservations().add(reservation);
 
         po.setStatus(POStatus.OPEN);
+
+        poRepository.save(po);
+        return purchaseOrderAssembler.toResource(po);
+
     }
 }
