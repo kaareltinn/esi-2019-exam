@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface CustomInventoryRepository {
     List<PlantInventoryEntry> findAvailablePlants(String name, LocalDate startDate, LocalDate endDate);
-    List<PlantInventoryItem> findAvailableItems(String name, LocalDate startDate, LocalDate endDate);
+    List<PlantInventoryItem> findAvailableItems(Long id, LocalDate startDate, LocalDate endDate);
 }

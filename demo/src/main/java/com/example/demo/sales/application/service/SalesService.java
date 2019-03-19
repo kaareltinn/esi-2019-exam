@@ -67,7 +67,7 @@ public class SalesService {
         poRepository.save(po);
 
         List<PlantInventoryItem> availableItems = inventoryRepository.findAvailableItems(
-                po.getPlant().getName(),
+                po.getPlant().getId(),
                 po.getRentalPeriod().getStartDate(),
                 po.getRentalPeriod().getEndDate());
 
@@ -83,10 +83,34 @@ public class SalesService {
         plantReservationRepository.save(reservation);
         po.getReservations().add(reservation);
 
-        po.setStatus(POStatus.OPEN);
-
         poRepository.save(po);
         return purchaseOrderAssembler.toResource(po);
 
+    }
+
+    public PurchaseOrderDTO acceptPO(Long id) throws Exception {
+        PurchaseOrder po = getPO(id);
+        po.setStatus(POStatus.OPEN);
+        poRepository.save(po);
+        return purchaseOrderAssembler.toResource(po);
+    }
+
+    public PurchaseOrderDTO rejectPO(Long id) throws Exception {
+        PurchaseOrder po = getPO(id);
+        while (!po.getReservations().isEmpty()) {
+            plantReservationRepository.delete(po.getReservations().remove(0));
+        }
+        po.setStatus(POStatus.CLOSED);
+        poRepository.save(po);
+        return purchaseOrderAssembler.toResource(po);
+    }
+
+    private PurchaseOrder getPO(Long id) throws Exception {
+        PurchaseOrder po = poRepository.findById(id).orElse(null);
+        if(po == null)
+            throw new Exception("PO Not Found");
+        if(po.getStatus() != POStatus.PENDING)
+            throw new Exception("PO cannot be accepted/rejected due to it is not Pending");
+        return po;
     }
 }

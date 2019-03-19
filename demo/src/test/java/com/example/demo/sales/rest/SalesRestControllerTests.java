@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -42,7 +43,7 @@ public class SalesRestControllerTests {
     private WebApplicationContext wac;
     private MockMvc mockMvc;
 
-    @Autowired
+    @Autowired @Qualifier("_halObjectMapper")
     ObjectMapper mapper;
 
     @Before
@@ -68,5 +69,34 @@ public class SalesRestControllerTests {
 
         mockMvc.perform(post("/api/sales/orders").content(mapper.writeValueAsString(order)).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    @Sql("/plants-dataset.sql")
+    public void testPurchaseOrderAcceptance() throws Exception {
+        MvcResult result = mockMvc.perform(
+                get("/api/sales/plants?name=Exc&startDate=2019-04-14&endDate=2019-04-25"))
+                .andReturn();
+        List<PlantInventoryEntryDTO> plants =
+                mapper.readValue(result.getResponse().getContentAsString(),
+                        new TypeReference<List<PlantInventoryEntryDTO>>() { });
+
+        PurchaseOrderDTO order = new PurchaseOrderDTO();
+        order.setPlant(plants.get(2));
+        order.setRentalPeriod(BusinessPeriodDTO.of(LocalDate.of(2019, 4, 14), LocalDate.of(2019, 4, 25)));
+
+        result = mockMvc.perform(post("/api/sales/orders")
+                .content(mapper.writeValueAsString(order))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", not(isEmptyOrNullString())))
+                .andReturn();
+
+        order = mapper.readValue(result.getResponse().getContentAsString(), PurchaseOrderDTO.class);
+
+        assertThat(order.get_xlink("accept")).isNotNull();
+
+        mockMvc.perform(post(order.get_xlink("accept").getHref()))
+                .andReturn();
     }
 }

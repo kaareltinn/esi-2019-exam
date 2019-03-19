@@ -22,11 +22,11 @@ public class InventoryRepositoryImpl implements CustomInventoryRepository {
                 .getResultList();
     }
 
-    public List<PlantInventoryItem> findAvailableItems(String name, LocalDate startDate, LocalDate endDate) {
-        return em.createQuery("select p from PlantInventoryItem p where p.plantInfo.name like ?1 and p not in " +
+    public List<PlantInventoryItem> findAvailableItems(Long id, LocalDate startDate, LocalDate endDate) {
+        return em.createQuery("select p from PlantInventoryItem p where p.plantInfo.id=?1 and p not in " +
                         "(select r.plant from PlantReservation r where ?2 < r.schedule.endDate and ?3 > r.schedule.startDate)",
                 PlantInventoryItem.class)
-                .setParameter(1, name)
+                .setParameter(1, id)
                 .setParameter(2, startDate)
                 .setParameter(3, endDate)
                 .getResultList();

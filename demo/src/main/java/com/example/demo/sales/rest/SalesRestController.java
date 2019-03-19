@@ -51,6 +51,26 @@ public class SalesRestController {
          return new ResponseEntity<>(newlyCreatePODTO, headers, HttpStatus.CREATED);
     }
 
+    @PostMapping("/orders/{id}/accept")
+    public PurchaseOrderDTO acceptPurchaseOrder(@PathVariable Long id) throws Exception {
+        try {
+            return salesService.acceptPO(id);
+        } catch (Exception ex) {
+            // Add code to Handle Exception (Change return null with the solution)
+            return null;
+        }
+    }
+
+    @DeleteMapping("/orders/{id}/reject")
+    public PurchaseOrderDTO rejectPurchaseOrder(@PathVariable Long id) throws Exception {
+        try {
+            return salesService.rejectPO(id);
+        } catch (Exception ex) {
+            // Add code to Handle Exception (Change return null with the solution)
+            return null;
+        }
+    }
+
     @ExceptionHandler(PlantNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public void handPlantNotFoundException(PlantNotFoundException ex) {
