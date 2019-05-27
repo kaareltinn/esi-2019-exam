@@ -54,4 +54,6 @@ public class PurchaseOrder {
     public void addReservation(PlantReservation reservation) {
         reservations.add(reservation);
     }
+
+    public void setRentalPeriod(BusinessPeriod newPeriod) { rentalPeriod = newPeriod; }
 }

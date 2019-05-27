@@ -1,10 +1,12 @@
 package com.example.demo.sales.rest;
 
+import com.example.demo.common.application.dto.BusinessPeriodDTO;
 import com.example.demo.common.application.exception.PlantNotFoundException;
 import com.example.demo.inventory.application.dto.PlantInventoryEntryDTO;
 import com.example.demo.inventory.application.service.InventoryService;
 import com.example.demo.sales.application.dto.PurchaseOrderDTO;
 import com.example.demo.sales.application.service.SalesService;
+import com.example.demo.sales.domain.PurchaseOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -65,6 +67,16 @@ public class SalesRestController {
     public PurchaseOrderDTO rejectPurchaseOrder(@PathVariable Long id) throws Exception {
         try {
             return salesService.rejectPO(id);
+        } catch (Exception ex) {
+            // Add code to Handle Exception (Change return null with the solution)
+            return null;
+        }
+    }
+
+    @PutMapping("/orders/{id}/changePeriod")
+    public PurchaseOrderDTO changePeriod(@PathVariable("id") Long id, @RequestBody BusinessPeriodDTO periodDTO) {
+       try {
+            return salesService.changePeriod(id, periodDTO);
         } catch (Exception ex) {
             // Add code to Handle Exception (Change return null with the solution)
             return null;

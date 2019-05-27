@@ -1,5 +1,6 @@
 package com.example.demo.sales.application.service;
 
+import com.example.demo.common.application.dto.BusinessPeriodDTO;
 import com.example.demo.common.application.service.BusinessPeriodValidator;
 import com.example.demo.common.domain.BusinessPeriod;
 import com.example.demo.inventory.application.service.InventoryService;
@@ -86,6 +87,61 @@ public class SalesService {
         poRepository.save(po);
         return purchaseOrderAssembler.toResource(po);
 
+    }
+
+    public PurchaseOrderDTO changePeriod(Long id, BusinessPeriodDTO periodDTO) throws Exception {
+        PurchaseOrder po = poRepository.findById(id).orElse(null);
+
+        if(po == null)
+            throw new Exception("PO Not Found");
+        if(po.getStatus() != POStatus.OPEN)
+            throw new Exception("PO period cannot be changed due to it is not accepted");
+
+        BusinessPeriod period = BusinessPeriod.of(
+                periodDTO.getStartDate(),
+                periodDTO.getEndDate()
+        );
+
+        DataBinder binder = new DataBinder(period);
+        binder.addValidators(new BusinessPeriodValidator());
+        binder.validate();
+
+        if (binder.getBindingResult().hasErrors())
+            throw new Exception("Invalid PO Period");
+
+        List<PlantInventoryItem> availableItems = inventoryRepository.findAvailableItems(
+                po.getPlant().getId(),
+                po.getRentalPeriod().getStartDate(),
+                po.getRentalPeriod().getEndDate());
+
+        if(availableItems.size() == 0) {
+            throw new Exception("No available items");
+        }
+
+        for (PlantReservation reservation : po.getReservations()) {
+            PlantInventoryItem item = reservation.getPlant();
+            if (availableItems.contains(item)) {
+                reservation.setSchedule(period);
+                plantReservationRepository.save(reservation);
+                po.setRentalPeriod(period);
+                poRepository.save(po);
+                return purchaseOrderAssembler.toResource(po);
+            }
+        }
+
+        // create new reservation
+        po.setRentalPeriod(period);
+        poRepository.save(po);
+
+        PlantReservation reservation = new PlantReservation();
+        reservation.setSchedule(po.getRentalPeriod());
+        reservation.setPlant(availableItems.get(0));
+
+        plantReservationRepository.save(reservation);
+        po.getReservations().add(reservation);
+
+        poRepository.save(po);
+        return purchaseOrderAssembler.toResource(po);
     }
 
     public PurchaseOrderDTO acceptPO(Long id) throws Exception {
