@@ -19,11 +19,21 @@ import cucumber.api.PendingException;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
@@ -35,7 +45,7 @@ import java.util.Map;
 public class ChangeOfPurchaseOrderSteps {
     @Autowired
     private WebApplicationContext wac;
-
+    private MockMvc mockMvc;
     private WebClient customerBrowser;
     HtmlPage customerPage;
 
@@ -54,6 +64,7 @@ public class ChangeOfPurchaseOrderSteps {
     @Before  // Use `Before` from Cucumber library
     public void setUp() {
         customerBrowser = MockMvcWebClientBuilder.webAppContextSetup(wac).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
     @After  // Use `After` from Cucumber library
@@ -95,7 +106,7 @@ public class ChangeOfPurchaseOrderSteps {
             purchaseOrderRepository.save(po);
             PlantReservation reservation = new PlantReservation();
             reservation.setSchedule(po.getRentalPeriod());
-            PlantInventoryItem item = plantInventoryItemRepository.getOne(Long.parseLong(row.get("item_id")));
+            PlantInventoryItem item = plantInventoryItemRepository.findOneByPlantInfo(plant);
             reservation.setPlant(item);
 
             plantReservationRepository.save(reservation);
@@ -107,8 +118,25 @@ public class ChangeOfPurchaseOrderSteps {
 
     @When("^the customer wants to change PO period from \"([^\"]*)\" to \"([^\"]*)\"$")
     public void the_customer_wants_to_change_PO_period_from_to(String arg1, String arg2) throws Throwable {
-        // Write code here that turns the phrase above into concrete actions
-        throw new PendingException();
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPut request = new HttpPut("http://localhost:8080/api/sales/orders/1/changePeriod");
+        JSONObject json = new JSONObject();
+        json.put("startDate", arg1);
+        json.put("endDate", arg2);
+        StringEntity se = new StringEntity( "JSON: " + json.toString());
+        se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+        request.setEntity(se);
+        httpClient.execute(request);
     }
 
+    @Then("^PO period is changed from \\\"([^\\\"]*)\\\" to \\\"([^\\\"]*)\\\"$\"$")
+    public void po_period_is_changed(String arg1, String arg2) throws Throwable {
+        PurchaseOrder po = purchaseOrderRepository.getOne(Long.parseLong("1"));
+        BusinessPeriod expectedPeriod = BusinessPeriod.of(
+                LocalDate.parse(arg1),
+                LocalDate.parse(arg2)
+        );
+
+        assert(po.getRentalPeriod()).equals(expectedPeriod);
+    }
 }

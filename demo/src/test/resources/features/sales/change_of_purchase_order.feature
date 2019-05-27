@@ -17,4 +17,4 @@ Feature: Change of Purchase Order Period
       | id | plant  | item_id | startDate | endDate     | status    |
       | 1  |  1     |   1     | 2019-05-28 | 2019-05-30 | OPEN  |
     When the customer wants to change PO period from "2019-05-29" to "2019-06-01"
-    Then PO period is changed
+    Then PO period is changed from "2019-05-29" to "2019-06-01"
